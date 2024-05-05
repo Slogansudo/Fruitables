@@ -24,6 +24,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+
+
+# SECRET_KEY='django-insecure-pnpa4h-5@kh^9^v+^ev&luy#h$e@vx1wr2@l04p+z-_9b-eeas'
+
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -80,6 +84,9 @@ TEMPLATES = [
         },
     },
 ]
+
+
+# WSGI_APPLICATION='core.wsgi.application'
 
 WSGI_APPLICATION = os.getenv("WSGI_APPLICATION")
 
