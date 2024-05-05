@@ -29,7 +29,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['209.38.152.7']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -151,16 +151,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATIC_URL = 'static/'
 if DEBUG:
-<<<<<<< HEAD:shop_foot/core/settings.py
     STATICFILES_DIRS = [BASE_DIR, 'static']
 else:
     STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
-
-=======
-    STATICFILES_DIRS = [BASE_DIR / 'staticfiles/']
-else:
-    STATIC_ROOT = BASE_DIR / 'static/'
->>>>>>> c8ac24741d9df40c3e5b367806d9ded10f873c54:shop_food/core/settings.py
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
