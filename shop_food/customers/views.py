@@ -1,7 +1,6 @@
 
 from django.shortcuts import render, redirect
 from django.views import View
-from .models import Customers
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
@@ -18,18 +17,17 @@ class LandingPageView(View):
             categories = Category.objects.all()
             products = Product.objects.all()
             comments = Comment.objects.all()
-            customers = Customers.objects.all()
-            number_product = 0
-            number_customer = 0
+            users = User.objects.filter(is_active=True)
+            cart = Cart.objects.filter(user=request.user)
+            number_product = products.count()
+            number_customer = users.count()
+            number_order = cart.count
             a = 1
-            for data in products:
-                number_product += 1
-            for data in customers:
-                number_customer += 1
             context = {
                 'categories': categories,
                 'products': products,
                 'comments': comments,
+                'number_order': number_order,
                 'number_product': number_product,
                 'number_customer': number_customer,
                 'a': a,
@@ -39,18 +37,17 @@ class LandingPageView(View):
             categories = Category.objects.filter(title__icontains=search)
             products = Product.objects.filter(title__icontains=search)
             comments = Comment.objects.all()
-            customers = Customers.objects.all()
-            number_product = 0
-            number_customer = 0
+            cart = Cart.objects.filter(user=request.user)
+            users = User.objects.filter(is_active=True)
+            number_product = products.count()
+            number_order = cart.count()
+            number_customer = users.count()
             a = 1
-            for data in products:
-                number_product += 1
-            for data in customers:
-                number_customer += 1
             context = {
                 'categories': categories,
                 'products': products,
                 'comments': comments,
+                'number_order': number_order,
                 'number_product': number_product,
                 'number_customer': number_customer,
                 'a': a,
@@ -74,7 +71,7 @@ class UsersLoginView(View):
             login(request, user)
             return redirect('landing')
         else:
-            return render(request, 'vegetable_web/404.html')
+            return render(request, 'auth/login_users.html')
 
 
 class UsersLogoutView(View):
@@ -106,14 +103,18 @@ class UserRegisterView(View):
 class ContactView(View):
     def get(self, request):
         a = 1
-        return render(request, 'vegetable_web/contact.html', {'a': a})
+        cart = Cart.objects.filter(user=request.user)
+        number_order = cart.count()
+        return render(request, 'vegetable_web/contact.html', {'a': a, 'number_order': number_order})
 
 
 class ProfileView(View):
     def get(self, request):
         if request.user.is_authenticated:
             user = User.objects.get(username=request.user.username)
-            return render(request, 'vegetable_web/profile.html', {'user': user})
+            cart = Cart.objects.filter(user=request.user)
+            number_order = cart.count()
+            return render(request, 'vegetable_web/profile.html', {'user': user, 'number_order': number_order})
         else:
             return render(request, 'vegetable_web/profile.html')
 

@@ -1,6 +1,5 @@
 
 from django.db import models
-from customers.models import Customers
 from .helps import SaveMediaFile, PriceType, WeightType
 from django.contrib.auth.models import User
 # Create your models here.
@@ -48,7 +47,8 @@ class Product(models.Model):
 
 
 class Cart(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     product_number = models.IntegerField(default=1)
     shipping_price = models.FloatField(default=3)
     total_price = models.FloatField(default=0)
