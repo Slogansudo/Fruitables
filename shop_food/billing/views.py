@@ -35,7 +35,7 @@ class CheckOutView(LoginRequiredMixin, View):
         cart.save()
         billing = Billing.objects.create(cart=cart, payment_type=cart.product.price_type)
         billing.save()
-        return redirect('testimonial')
+        return redirect('landing')
 
 
 class TestimonialView(LoginRequiredMixin, View):
