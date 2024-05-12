@@ -15,7 +15,6 @@
 
 
         <!-- Checkout Page Start -->
-        {% if request.user.is_authenticated %}
         <div class="container-fluid py-5">
             <div class="container py-5">
                 <h1 class="mb-4">Billing details</h1>
@@ -188,18 +187,16 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row g-4 text-center align-items-center justify-content-center pt-4">
-                                <button type="button" class="btn border-secondary py-3 px-4 text-uppercase w-100 text-primary">Place Order</button>
-                            </div>
+                                <div class="row g-4 text-center align-items-center justify-content-center pt-4">
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn border-secondary py-3 px-4 text-uppercase w-100 text-primary">Place Order</button>
+                                    </form>
+                                </div>
                         </div>
                     </div>
                 </form>
             </div>
         </div>
         <!-- Checkout Page End -->
-    {% else %}
-        <h1><a href="{% url 'login' %}"> Sig In</a></h1>
-        <h1><a href="{% url 'register' %}"> Sign Up</a></h1>
-    {% endif %}
-
 {% endblock %}

@@ -12,7 +12,7 @@ class PaymentType(models.TextChoices):
 class Billing(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
     payment_type = models.CharField(max_length=10, choices=PaymentType.choices, default=PaymentType.cash)
-    comments = models.TextField()
+    comments = models.TextField(null=True, blank=True)
     created_date = models.DateTimeField(auto_now_add=True)
     last_update = models.DateTimeField(auto_now=True)
 

@@ -1,6 +1,6 @@
+
 from django.urls import path, include
-from .views import (CountryAPIViewSet, CityAPIViewSet, AddressAPIViewSet, CustomersAPIViewSet, CommentAPIViewSet,
-                    CategoryAPIViewSet, ProductAPIViewSet, CartAPIViewSet, BillingAPIViewSet)
+from .views import ArtistAPIViewSet, AlbumAPIViewSet, SongsAPIViewSet
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken import views
 from rest_framework import permissions
@@ -21,15 +21,9 @@ schema_view = get_schema_view(
 )
 
 router = DefaultRouter()
-router.register('country', viewset=CountryAPIViewSet)
-router.register('city', viewset=CityAPIViewSet)
-router.register('address', viewset=AddressAPIViewSet)
-router.register('customers', viewset=CustomersAPIViewSet)
-router.register('comments', viewset=CommentAPIViewSet)
-router.register('category', viewset=CategoryAPIViewSet)
-router.register('products', viewset=ProductAPIViewSet)
-router.register('cart', viewset=CartAPIViewSet)
-router.register('billing', viewset=BillingAPIViewSet)
+router.register('songs', viewset=SongsAPIViewSet)
+router.register('artists', viewset=ArtistAPIViewSet)
+router.register('albums', viewset=AlbumAPIViewSet)
 
 
 urlpatterns = [
@@ -37,5 +31,5 @@ urlpatterns = [
     path('auth/', views.obtain_auth_token),
     path('docs-swagger/', schema_view.with_ui("swagger", cache_timeout=0), name='swagger'),
     path('docs-redoc/', schema_view.with_ui("redoc", cache_timeout=0), name='redoc'),
-    path('api-auth/', include('rest_framework.urls')),
 ]
+

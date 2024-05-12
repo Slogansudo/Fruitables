@@ -122,7 +122,6 @@
         </div>
         <!-- Single Page Header End -->
 
-    {% if request.user.is_authenticated %}
         <!-- Cart Page Start -->
         <div class="container-fluid py-5">
             <div class="container py-5">
@@ -144,6 +143,7 @@
                                 <th scope="row">
                                     <div class="d-flex align-items-center">
                                         <img src="{{car.product.image.url}}" class="img-fluid me-5 rounded-circle" style="width: 80px; height: 80px;" alt="">
+                                        <p>payment status = {{car.payment_status}}</p>
                                     </div>
                                 </th>
                                 <td>
@@ -216,10 +216,6 @@
             </div>
         </div>
         <!-- Cart Page End -->
-    {% else %}
-        <h1><a href="{% url 'login' %}"> Sig In</a></h1>
-        <h1><a href="{% url 'register' %}"> Sign Up</a></h1>
-    {% endif %}
 
                 <!-- Footer Start -->
         <div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">

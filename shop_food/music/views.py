@@ -1,105 +1,115 @@
+from django.db.transaction import atomic
+from rest_framework.decorators import action
 from rest_framework.views import APIView
-from rest_framework import status, filters
 from rest_framework.response import Response
+from .models import Artist, Album, Songs
+from .serializers import ArtistSerializer, AlbumSerializer, SongsSerializer
+from rest_framework import status, filters
 from rest_framework.viewsets import ModelViewSet
-from billing.models import Billing
-from products.models import Comment, Category, Product, Cart
-from customers.models import Country, City, Address, Customers
-from .serializer import AddressSerializer, ProductSerializer, CustomersSerializer, CategorySerializer, CommentSerializer, CartSerializer, BillingSerializer,CountrySerializer, CitySerializer
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.pagination import LimitOffsetPagination
-# Create your views here.
 
 
-class CountryAPIViewSet(ModelViewSet):
-    queryset = Country.objects.all()
-    serializer_class = CountrySerializer
-    #authentication_classes = (TokenAuthentication, )
-    permission_classes = [IsAuthenticated]
-    filter_backends = (filters.SearchFilter, )
-    search_fields = ['name', 'id']
+class ArtistAPIViewSet(ModelViewSet):
+    queryset = Artist.objects.all()
+    serializer_class = ArtistSerializer
+    permission_classes = [IsAuthenticated, IsAdminUser]
     pagination_class = LimitOffsetPagination
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['id', 'name']
 
-    # http://api.example.org/accounts/?limit=100
-    # /?offset=400&limit=100
+    @action(detail=True, methods=['GET'])
+    def check_famous(self, request, *args, **kwargs):
+        artist = self.get_object()
+        album = Album.objects.filter(artist=artist)
+        count = album.count()
+        with atomic():
+            if count >= 2:
+                artist.famous_rating = True
+                artist.save()
+                return Response(data=artist.famous_rating)
+            else:
+                return Response(data=artist.famous_rating)
+
+    @action(detail=False, methods=['GET'])
+    def top_famous(self, request, *args, **kwargs):
+        artists = self.get_queryset()
+        artists = artists.filter(famous_rating=True)
+        serializer = ArtistSerializer(artists, many=True)
+        return Response(data=serializer.data)
+
+    @action(detail=False, methods=['GET'])
+    def re_order(self, request, *args, **kwargs):
+        artists = self.get_queryset()
+        artists = artists.order_by('-id')
+        serializer = ArtistSerializer(artists, many=True)
+        return Response(data=serializer.data)
 
 
-class CityAPIViewSet(ModelViewSet):
-    queryset = City.objects.all()
-    serializer_class = CitySerializer
-    #authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-    filter_backends = (filters.SearchFilter, )
-    search_fields = ['name', 'country__name',]
+class AlbumAPIViewSet(ModelViewSet):
+    queryset = Album.objects.all()
+    serializer_class = AlbumSerializer
+    permission_classes = [IsAuthenticated, ]
     pagination_class = LimitOffsetPagination
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['id', 'title', 'artist__name']
+
+    @action(detail=False, methods=['GET'])
+    def top(self, request, *args, **kwargs):
+        albums = self.get_queryset()
+        albums = albums.order_by('-rating')[:2]
+        serializer = AlbumSerializer(albums, many=True)
+        return Response(data=serializer.data)
+
+    @action(detail=True, methods=['GET'])
+    def artist(self, request, *args, **kwargs):
+        album = self.get_object()
+        artist = album.artist
+        serializer = ArtistSerializer(artist)
+        return Response(data=serializer.data)
+
+    @action(detail=False, methods=['GET'])
+    def re_order(self, request, *args, **kwargs):
+        album = self.get_queryset()
+        album = album.order_by('-id')
+        serializer = AlbumSerializer(album, many=True)
+        return Response(data=serializer.data)
 
 
-class AddressAPIViewSet(ModelViewSet):
-    queryset = Address.objects.all()
-    serializer_class = AddressSerializer
-    #authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-    filter_backends = (filters.SearchFilter, )
-    search_fields = ['name', 'city__name', 'city__country__name',]
+class SongsAPIViewSet(ModelViewSet):
+    queryset = Songs.objects.all()
+    serializer_class = SongsSerializer
+    permission_classes = [IsAuthenticated, ]
     pagination_class = LimitOffsetPagination
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['title', 'album__title', 'album__artist__name']
 
+    @action(detail=True, methods=["GET"])
+    def listen(self, request, *args, **kwargs):
+        songs = self.get_object()
+        with atomic():
+            songs.listened += 1
+            songs.save()
+            return Response(status=status.HTTP_200_OK)
 
-class CustomersAPIViewSet(ModelViewSet):
-    queryset = Customers.objects.all()
-    serializer_class = CustomersSerializer
-    #authentication_classes = (TokenAuthentication, )
-    permission_classes = (IsAdminUser, )
-    filter_backends = (filters.SearchFilter, )
-    search_fields = ['first_name', 'last_name', 'username', 'email', 'address__name', 'address__city__name', 'address__city__country__name', 'phone_number']
-    pagination_class = LimitOffsetPagination
+    @action(detail=False, methods=["GET"])
+    def top(self, request, *args, **kwargs):
+        songs = self.get_queryset()
+        songs = songs.order_by('-listened')[:3]
+        serializer = SongsSerializer(songs, many=True)
+        return Response(data=serializer.data)
 
+    @action(detail=True, methods=["GET"])
+    def album(self, request, *args, **kwargs):
+        songs = self.get_object()
+        album = songs.album
+        serializer = AlbumSerializer(album)
+        return Response(data=serializer.data)
 
-class CommentAPIViewSet(ModelViewSet):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-    #authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ['text', 'id', 'customer__first_name', 'customer__last_name', 'customer__username']
-    pagination_classes = LimitOffsetPagination
-
-
-class CategoryAPIViewSet(ModelViewSet):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
-    #authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ['title', 'created_date']
-    pagination_class = LimitOffsetPagination
-
-
-class ProductAPIViewSet(ModelViewSet):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-    #authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ['title', 'description', 'manufacturer_name', 'category__title', 'price', 'price_type', 'rating', 'max_weight', 'comments__text', 'comments__customer__username']
-    pagination_class = LimitOffsetPagination
-
-
-class CartAPIViewSet(ModelViewSet):
-    queryset = Cart.objects.all()
-    serializer_class = CartSerializer
-    #authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ['product__title', 'product__category__title', 'product__price', 'product__rating', 'product_number', 'product__comments__customer__username']
-    pagination_class = LimitOffsetPagination
-
-
-class BillingAPIViewSet(ModelViewSet):
-    queryset = Billing.objects.all()
-    serializer_class = BillingSerializer
-    #authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ['customer__first_name', 'customer__last_name', 'customer__username', 'cart__total_price']
-    pagination_class = LimitOffsetPagination
+    @action(detail=True, methods=["GET"])
+    def artist(self, request, *args, **kwargs):
+        songs = self.get_object()
+        artist = songs.album.artist
+        serializer = ArtistSerializer(artist)
+        return Response(data=serializer.data)

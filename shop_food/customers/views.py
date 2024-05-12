@@ -5,54 +5,91 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from products.models import Category, Comment, Product, Cart
-
+from django.contrib.auth.mixins import LoginRequiredMixin
 # Create your views here.
 
 
 class LandingPageView(View):
     def get(self, request):
-        search = request.GET.get('search')
-        print(search)
-        if not search:
-            categories = Category.objects.all()
-            products = Product.objects.all()
-            comments = Comment.objects.all()
-            users = User.objects.filter(is_active=True)
-            cart = Cart.objects.filter(user=request.user)
-            number_product = products.count()
-            number_customer = users.count()
-            number_order = cart.count
-            a = 1
-            context = {
-                'categories': categories,
-                'products': products,
-                'comments': comments,
-                'number_order': number_order,
-                'number_product': number_product,
-                'number_customer': number_customer,
-                'a': a,
-            }
-            return render(request, 'vegetable_web/index.html', context)
+        if request.user.is_authenticated:
+            search = request.GET.get('search')
+            if not search:
+                categories = Category.objects.all()
+                products = Product.objects.all()
+                comments = Comment.objects.all()
+                users = User.objects.filter(is_active=True)
+                cart = Cart.objects.filter(user=request.user)
+                number_product = products.count()
+                number_customer = users.count()
+                number_order = cart.count
+                a = 1
+                context = {
+                    'categories': categories,
+                    'products': products,
+                    'comments': comments,
+                    'number_order': number_order,
+                    'number_product': number_product,
+                    'number_customer': number_customer,
+                    'a': a,
+                }
+                return render(request, 'vegetable_web/index.html', context)
+            else:
+                categories = Category.objects.filter(title__icontains=search)
+                products = Product.objects.filter(title__icontains=search)
+                comments = Comment.objects.all()
+                cart = Cart.objects.filter(user=request.user)
+                users = User.objects.filter(is_active=True)
+                number_product = products.count()
+                number_order = cart.count()
+                number_customer = users.count()
+                a = 1
+                context = {
+                    'categories': categories,
+                    'products': products,
+                    'comments': comments,
+                    'number_order': number_order,
+                    'number_product': number_product,
+                    'number_customer': number_customer,
+                    'a': a,
+                }
+                return render(request, 'vegetable_web/index.html', context)
         else:
-            categories = Category.objects.filter(title__icontains=search)
-            products = Product.objects.filter(title__icontains=search)
-            comments = Comment.objects.all()
-            cart = Cart.objects.filter(user=request.user)
-            users = User.objects.filter(is_active=True)
-            number_product = products.count()
-            number_order = cart.count()
-            number_customer = users.count()
-            a = 1
-            context = {
-                'categories': categories,
-                'products': products,
-                'comments': comments,
-                'number_order': number_order,
-                'number_product': number_product,
-                'number_customer': number_customer,
-                'a': a,
-            }
-            return render(request, 'vegetable_web/index.html', context)
+            search = request.GET.get('search')
+            if not search:
+                categories = Category.objects.all()
+                products = Product.objects.all()
+                comments = Comment.objects.all()
+                users = User.objects.filter(is_active=True)
+                number_product = products.count()
+                number_customer = users.count()
+                a = 1
+                context = {
+                    'categories': categories,
+                    'products': products,
+                    'comments': comments,
+                    'number_product': number_product,
+                    'number_customer': number_customer,
+                    'a': a,
+                }
+                return render(request, 'vegetable_web/index.html', context)
+            else:
+                categories = Category.objects.filter(title__icontains=search)
+                products = Product.objects.filter(title__icontains=search)
+                comments = Comment.objects.all()
+                users = User.objects.filter(is_active=True)
+                number_product = products.count()
+
+                number_customer = users.count()
+                a = 1
+                context = {
+                    'categories': categories,
+                    'products': products,
+                    'comments': comments,
+                    'number_product': number_product,
+                    'number_customer': number_customer,
+                    'a': a,
+                }
+                return render(request, 'vegetable_web/index.html', context)
 
 
 class UsersLoginView(View):
@@ -100,7 +137,7 @@ class UserRegisterView(View):
             return redirect('login')
 
 
-class ContactView(View):
+class ContactView(LoginRequiredMixin, View):
     def get(self, request):
         a = 1
         cart = Cart.objects.filter(user=request.user)
@@ -108,7 +145,7 @@ class ContactView(View):
         return render(request, 'vegetable_web/contact.html', {'a': a, 'number_order': number_order})
 
 
-class ProfileView(View):
+class ProfileView(LoginRequiredMixin, View):
     def get(self, request):
         if request.user.is_authenticated:
             user = User.objects.get(username=request.user.username)

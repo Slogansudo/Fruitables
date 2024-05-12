@@ -1,12 +1,12 @@
 
+
 from rest_framework import serializers
 from billing.models import Billing
 from products.models import Comment, Category, Product, Cart
-from customers.models import Country, City, Address, Customers
 from django.contrib.auth.models import User
 
 
-class CountrySerializer(serializers.ModelSerializer):
+"""class CountrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Country
         fields = ['id', 'name', 'created_date']
@@ -34,12 +34,13 @@ class CustomersSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customers
         fields = ['id', 'first_name', 'last_name', 'username', 'email', 'address', 'created_date']
+"""
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = '__all__'
+        fields = 'username', 'first_name', 'last_name', 'email'
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -53,19 +54,16 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ['id', 'title', 'image', 'created_date']
+        fields = ['id', 'national', 'title', 'image', 'created_date']
 
 
 class ProductSerializer(serializers.ModelSerializer):
-   comments = CommentSerializer(many=True, read_only=True)
-
    class Meta:
        model = Product
-       fields = ['id', 'title', 'description', 'category', 'image', 'price', 'price_type', 'rating', 'comments']
+       fields = ['id', 'title', 'description', 'category', 'image', 'price', 'popular_products', 'price_type', 'rating', 'comments']
 
 
 class CartSerializer(serializers.ModelSerializer):
-    product = ProductSerializer(read_only=True)
 
     class Meta:
         model = Cart
